@@ -1,13 +1,48 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Product {
+  id        String      @id @default(cuid())
+  name      String
+  inventory Inventory[]
+}
+
+model Warehouse {
+  id        String      @id @default(cuid())
+  name      String
+  inventory Inventory[]
+}
+
+model Inventory {
+  id            String        @id @default(cuid())
+  productId     String
+  warehouseId   String
+  totalUnits    Int
+  reservedUnits Int           @default(0)
+  product       Product       @relation(fields: [productId], references: [id])
+  warehouse     Warehouse     @relation(fields: [warehouseId], references: [id])
+  reservations  Reservation[]
+
+  @@unique([productId, warehouseId])
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  RELEASED
+}
+
+model Reservation {
+  id          String            @id @default(cuid())
+  inventoryId String
+  quantity    Int
+  status      ReservationStatus @default(PENDING)
+  expiresAt   DateTime
+  createdAt   DateTime          @default(now())
+  inventory   Inventory         @relation(fields: [inventoryId], references: [id])
 }
