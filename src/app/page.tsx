@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { Package, Warehouse, ShoppingCart, Plus, Minus } from 'lucide-react'
 
 type InventoryItem = { 
   id: string 
@@ -31,6 +32,14 @@ export default function ProductsPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const adjustQty = (id: string, current: number, delta: number, max: number) => {
+    const next = current + delta
+    setQuantities(prev => ({
+      ...prev,
+      [id]: Math.min(max, Math.max(1, next))
+    }))
+  }
+
   async function reserve(inventoryId: string) {
     const qty = quantities[inventoryId] ?? 1
     setReservingId(inventoryId)
@@ -39,7 +48,10 @@ export default function ProductsPage() {
     try {
       const res = await fetch('/api/reservations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Idempotency-Key': `reserve-${inventoryId}-${Date.now()}` // Client-side safe idempotency prefix
+        },
         body: JSON.stringify({ inventoryId, quantity: qty }),
       })
 
@@ -66,41 +78,53 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-8 flex-1 w-full">
+      <main className="max-w-6xl mx-auto px-6 py-12 space-y-8 flex-1 w-full">
         <div className="space-y-3">
-          <div className="h-8 w-64 bg-slate-200 rounded animate-pulse" />
+          <div className="h-10 w-48 bg-slate-200 rounded animate-pulse" />
           <div className="h-4 w-96 bg-slate-200 rounded animate-pulse" />
         </div>
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-40 bg-slate-100/50 border border-slate-200/80 rounded-xl animate-pulse" />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-96 bg-white border border-slate-200 rounded-2xl animate-pulse" />
+          ))}
+        </div>
       </main>
     )
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-12 space-y-8 flex-1 w-full">
+    <main className="max-w-6xl mx-auto px-6 py-12 space-y-8 flex-1 w-full">
       {/* Page Header */}
-      <div className="space-y-2 border-b border-slate-200/80 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-          Available Products
+      <div className="space-y-2 pb-2">
+        <h1 className="text-4xl font-semibold tracking-tight text-slate-900 font-serif">
+          Products
         </h1>
-        <p className="text-sm text-slate-500 max-w-2xl leading-relaxed">
-          Select an item and customize the quantity below. The database guarantees atomicity by acquiring row-level locks on the selected inventory record, preventing race conditions or double booking.
+        <p className="text-sm text-slate-500 leading-relaxed">
+          Select a warehouse slot to reserve stock for checkout.
         </p>
       </div>
 
-      {/* Products Grid */}
-      <div className="grid gap-6">
+      {/* 3-Column Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {products.map(product => (
-          <Card key={product.id} className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100">
-              <CardTitle className="text-xl font-semibold text-slate-800 tracking-tight">
-                {product.name}
-              </CardTitle>
-              <span className="text-xs text-slate-500 font-mono">ID: {product.id}</span>
+          <Card key={product.id} className="bg-white border-slate-200/80 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col">
+            {/* Custom Product Header exactly like mockup */}
+            <CardHeader className="flex flex-row items-center gap-3 space-y-0 p-5 bg-slate-50/50 border-b border-slate-100">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
+                <Package className="w-5 h-5" />
+              </div>
+              <div className="space-y-0.5">
+                <CardTitle className="text-base font-bold text-slate-800 tracking-tight leading-tight">
+                  {product.name}
+                </CardTitle>
+                <p className="text-[11px] font-medium text-slate-400">
+                  {product.inventory.length} warehouses
+                </p>
+              </div>
             </CardHeader>
-            <CardContent className="pt-5 space-y-4">
+
+            {/* Product Body containing Warehouse Slots */}
+            <CardContent className="p-5 flex-1 space-y-5">
               {product.inventory.map(inv => {
                 const isOutOfStock = inv.availableUnits <= 0
                 const isThisReserving = reservingId === inv.id
@@ -109,75 +133,78 @@ export default function ProductsPage() {
                 return (
                   <div 
                     key={inv.id} 
-                    className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50/50 border border-slate-200/50 hover:border-teal-500/20 hover:bg-slate-50 transition-all duration-200"
+                    className="p-4 rounded-2xl bg-[#f8fafc]/80 border border-slate-200/40 space-y-4 hover:border-blue-500/20 hover:bg-[#f8fafc] transition-all duration-200"
                   >
-                    {/* Left section: Warehouse Name & Details */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isOutOfStock ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-teal-50 text-teal-600 border border-teal-100'}`}>
-                          WH
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-700">{inv.warehouse}</p>
-                          <span className="text-[10px] font-mono text-slate-400">ID: {inv.id}</span>
-                        </div>
-                      </div>
+                    {/* Warehouse Header & Availability badge */}
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                        <Warehouse className="w-3.5 h-3.5 text-slate-400" />
+                        {inv.warehouse}
+                      </span>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-[10px] font-bold rounded-full px-2.5 py-0.5 border shadow-none ${
+                          isOutOfStock 
+                            ? 'bg-red-50 text-red-600 border-red-100' 
+                            : 'bg-emerald-50 text-emerald-600 border-emerald-100/60'
+                        }`}
+                      >
+                        {isOutOfStock ? 'Sold Out' : `${inv.availableUnits} available`}
+                      </Badge>
+                    </div>
 
-                      {/* Stock stats grid */}
-                      <div className="grid grid-cols-3 gap-2 sm:gap-6 text-xs font-mono sm:border-l border-slate-200 sm:pl-6 py-1">
-                        <div className="flex flex-col">
-                          <span className="text-slate-400 uppercase tracking-wider text-[9px]">Total</span>
-                          <span className="text-slate-600 font-semibold mt-0.5">{inv.totalUnits}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-slate-400 uppercase tracking-wider text-[9px]">Reserved</span>
-                          <span className="text-amber-600 font-semibold mt-0.5">{inv.reservedUnits}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-slate-400 uppercase tracking-wider text-[9px]">Available</span>
-                          <span className={`font-semibold mt-0.5 ${isOutOfStock ? 'text-red-500' : 'text-emerald-600'}`}>
-                            {isOutOfStock ? 'Out of Stock' : inv.availableUnits}
-                          </span>
-                        </div>
+                    {/* Stock Stats Grid precisely styled like mockup */}
+                    <div className="grid grid-cols-2 gap-3 text-xs font-medium">
+                      <div className="flex items-center justify-between px-3 py-2 bg-white border border-slate-200/60 rounded-xl">
+                        <span className="text-slate-400 text-[10px] uppercase font-semibold tracking-wider">Total</span>
+                        <span className="font-bold font-mono text-slate-700">{inv.totalUnits}</span>
+                      </div>
+                      <div className="flex items-center justify-between px-3 py-2 bg-white border border-slate-200/60 rounded-xl">
+                        <span className="text-slate-400 text-[10px] uppercase font-semibold tracking-wider">Reserved</span>
+                        <span className="font-bold font-mono text-slate-700">{inv.reservedUnits}</span>
                       </div>
                     </div>
 
-                    {/* Right section: Quantity Selector & Reserve Button */}
-                    <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 w-full lg:w-auto border-t lg:border-t-0 border-slate-100 pt-3 lg:pt-0">
+                    {/* Quantity Stepper exactly like mockup */}
+                    {!isOutOfStock && (
+                      <div className="flex items-center justify-between border border-slate-200/60 rounded-xl p-2 bg-white">
+                        <span className="text-xs font-semibold text-slate-500 pl-2">Quantity</span>
+                        <div className="flex items-center gap-2 border border-slate-200/80 rounded-lg bg-white p-1">
+                          <button 
+                            type="button"
+                            onClick={() => adjustQty(inv.id, currentQty, -1, inv.availableUnits)}
+                            disabled={isOutOfStock || currentQty <= 1 || reservingId !== null}
+                            className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 disabled:opacity-40 transition-colors"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-6 text-center text-xs font-bold font-mono text-slate-700">{currentQty}</span>
+                          <button 
+                            type="button"
+                            onClick={() => adjustQty(inv.id, currentQty, 1, inv.availableUnits)}
+                            disabled={isOutOfStock || currentQty >= inv.availableUnits || reservingId !== null}
+                            className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 disabled:opacity-40 transition-colors"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Reserve Button with Cart Icon exactly like mockup */}
+                    <div className="space-y-2">
                       {error[inv.id] && (
-                        <p className="text-xs font-medium text-red-500 max-w-[200px] text-right order-first sm:order-none">
+                        <p className="text-[11px] font-medium text-red-500 text-center">
                           {error[inv.id]}
                         </p>
                       )}
-
-                      {!isOutOfStock && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-slate-500">Qty:</span>
-                          <input
-                            type="number"
-                            min="1"
-                            max={inv.availableUnits}
-                            value={currentQty}
-                            onChange={(e) => {
-                              const val = parseInt(e.target.value) || 1
-                              setQuantities(q => ({ 
-                                ...q, 
-                                [inv.id]: Math.min(inv.availableUnits, Math.max(1, val)) 
-                              }))
-                            }}
-                            disabled={reservingId !== null}
-                            className="w-16 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-teal-500 text-center font-semibold font-mono"
-                          />
-                        </div>
-                      )}
-
                       <Button
                         disabled={isOutOfStock || reservingId !== null}
                         onClick={() => reserve(inv.id)}
-                        className={`w-full sm:w-28 font-medium shadow-sm transition-all duration-200 ${
+                        className={`w-full py-5 font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 rounded-xl shadow-none ${
                           isOutOfStock 
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none'
-                            : 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-600/10 hover:shadow-teal-600/20 active:scale-95'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/10 hover:shadow-blue-600/20 active:scale-95'
                         }`}
                       >
                         {isThisReserving ? (
@@ -186,7 +213,12 @@ export default function ProductsPage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '150ms' }} />
                             <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '300ms' }} />
                           </span>
-                        ) : isOutOfStock ? 'Sold Out' : 'Reserve'}
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-3.5 h-3.5" />
+                            Reserve
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
