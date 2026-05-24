@@ -68,11 +68,11 @@ export default function ProductsPage() {
     return (
       <main className="max-w-4xl mx-auto px-6 py-12 space-y-8 flex-1 w-full">
         <div className="space-y-3">
-          <div className="h-8 w-64 bg-slate-900 rounded animate-pulse" />
-          <div className="h-4 w-96 bg-slate-900 rounded animate-pulse" />
+          <div className="h-8 w-64 bg-slate-200 rounded animate-pulse" />
+          <div className="h-4 w-96 bg-slate-200 rounded animate-pulse" />
         </div>
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-40 bg-slate-900/50 border border-slate-900/80 rounded-xl animate-pulse" />
+          <div key={i} className="h-40 bg-slate-100/50 border border-slate-200/80 rounded-xl animate-pulse" />
         ))}
       </main>
     )
@@ -81,11 +81,11 @@ export default function ProductsPage() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-12 space-y-8 flex-1 w-full">
       {/* Page Header */}
-      <div className="space-y-2 border-b border-slate-900 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+      <div className="space-y-2 border-b border-slate-200/80 pb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           Available Products
         </h1>
-        <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+        <p className="text-sm text-slate-500 max-w-2xl leading-relaxed">
           Select an item and customize the quantity below. The database guarantees atomicity by acquiring row-level locks on the selected inventory record, preventing race conditions or double booking.
         </p>
       </div>
@@ -93,9 +93,9 @@ export default function ProductsPage() {
       {/* Products Grid */}
       <div className="grid gap-6">
         {products.map(product => (
-          <Card key={product.id} className="bg-slate-900/30 backdrop-blur border-slate-900/80 hover:border-slate-800/80 hover:bg-slate-900/40 transition-all duration-300 shadow-xl hover:shadow-2xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-950/50">
-              <CardTitle className="text-xl font-semibold text-slate-100 tracking-tight">
+          <Card key={product.id} className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100">
+              <CardTitle className="text-xl font-semibold text-slate-800 tracking-tight">
                 {product.name}
               </CardTitle>
               <span className="text-xs text-slate-500 font-mono">ID: {product.id}</span>
@@ -109,33 +109,33 @@ export default function ProductsPage() {
                 return (
                   <div 
                     key={inv.id} 
-                    className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950/40 border border-slate-900/50 hover:border-teal-500/10 hover:bg-slate-950/60 transition-all duration-200"
+                    className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50/50 border border-slate-200/50 hover:border-teal-500/20 hover:bg-slate-50 transition-all duration-200"
                   >
                     {/* Left section: Warehouse Name & Details */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isOutOfStock ? 'bg-slate-900 text-slate-500' : 'bg-teal-950/30 text-teal-400 border border-teal-900/30'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isOutOfStock ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-teal-50 text-teal-600 border border-teal-100'}`}>
                           WH
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-200">{inv.warehouse}</p>
-                          <span className="text-[10px] font-mono text-slate-500">ID: {inv.id}</span>
+                          <p className="text-sm font-medium text-slate-700">{inv.warehouse}</p>
+                          <span className="text-[10px] font-mono text-slate-400">ID: {inv.id}</span>
                         </div>
                       </div>
 
                       {/* Stock stats grid */}
-                      <div className="grid grid-cols-3 gap-2 sm:gap-6 text-xs font-mono sm:border-l border-slate-900 sm:pl-6 py-1">
+                      <div className="grid grid-cols-3 gap-2 sm:gap-6 text-xs font-mono sm:border-l border-slate-200 sm:pl-6 py-1">
                         <div className="flex flex-col">
-                          <span className="text-slate-500 uppercase tracking-wider text-[9px]">Total</span>
-                          <span className="text-slate-300 font-semibold mt-0.5">{inv.totalUnits}</span>
+                          <span className="text-slate-400 uppercase tracking-wider text-[9px]">Total</span>
+                          <span className="text-slate-600 font-semibold mt-0.5">{inv.totalUnits}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-slate-500 uppercase tracking-wider text-[9px]">Reserved</span>
-                          <span className="text-amber-500 font-semibold mt-0.5">{inv.reservedUnits}</span>
+                          <span className="text-slate-400 uppercase tracking-wider text-[9px]">Reserved</span>
+                          <span className="text-amber-600 font-semibold mt-0.5">{inv.reservedUnits}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-slate-500 uppercase tracking-wider text-[9px]">Available</span>
-                          <span className={`font-semibold mt-0.5 ${isOutOfStock ? 'text-red-500' : 'text-emerald-400'}`}>
+                          <span className="text-slate-400 uppercase tracking-wider text-[9px]">Available</span>
+                          <span className={`font-semibold mt-0.5 ${isOutOfStock ? 'text-red-500' : 'text-emerald-600'}`}>
                             {isOutOfStock ? 'Out of Stock' : inv.availableUnits}
                           </span>
                         </div>
@@ -143,16 +143,16 @@ export default function ProductsPage() {
                     </div>
 
                     {/* Right section: Quantity Selector & Reserve Button */}
-                    <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 w-full lg:w-auto border-t lg:border-t-0 border-slate-900/50 pt-3 lg:pt-0">
+                    <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 w-full lg:w-auto border-t lg:border-t-0 border-slate-100 pt-3 lg:pt-0">
                       {error[inv.id] && (
-                        <p className="text-xs font-medium text-red-400 max-w-[200px] text-right order-first sm:order-none">
+                        <p className="text-xs font-medium text-red-500 max-w-[200px] text-right order-first sm:order-none">
                           {error[inv.id]}
                         </p>
                       )}
 
                       {!isOutOfStock && (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-slate-400">Qty:</span>
+                          <span className="text-xs font-medium text-slate-500">Qty:</span>
                           <input
                             type="number"
                             min="1"
@@ -166,7 +166,7 @@ export default function ProductsPage() {
                               }))
                             }}
                             disabled={reservingId !== null}
-                            className="w-16 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-900 text-slate-200 text-sm focus:outline-none focus:border-teal-500 text-center font-semibold font-mono"
+                            className="w-16 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-teal-500 text-center font-semibold font-mono"
                           />
                         </div>
                       )}
@@ -174,9 +174,9 @@ export default function ProductsPage() {
                       <Button
                         disabled={isOutOfStock || reservingId !== null}
                         onClick={() => reserve(inv.id)}
-                        className={`w-full sm:w-28 font-medium shadow-md transition-all duration-200 ${
+                        className={`w-full sm:w-28 font-medium shadow-sm transition-all duration-200 ${
                           isOutOfStock 
-                            ? 'bg-slate-900 text-slate-500 cursor-not-allowed border border-slate-950'
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none'
                             : 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-600/10 hover:shadow-teal-600/20 active:scale-95'
                         }`}
                       >

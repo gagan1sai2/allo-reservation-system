@@ -72,40 +72,40 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
   return (
     <main className="max-w-xl mx-auto px-6 py-16 flex-1 flex flex-col justify-center items-center w-full">
-      <Card className="w-full bg-slate-900/30 backdrop-blur border-slate-900/80 shadow-2xl overflow-hidden relative">
+      <Card className="w-full bg-white border-slate-200 shadow-md overflow-hidden relative">
         {/* Glow accent bar */}
-        <div className={`absolute top-0 left-0 right-0 h-[3px] transition-all duration-300 ${expired ? 'bg-red-500 shadow-md shadow-red-500/50' : 'bg-gradient-to-r from-amber-500 to-teal-500 shadow-md shadow-teal-500/10'}`} />
+        <div className={`absolute top-0 left-0 right-0 h-[3px] transition-all duration-300 ${expired ? 'bg-red-500 shadow-sm shadow-red-500/20' : 'bg-gradient-to-r from-amber-500 to-teal-500 shadow-sm shadow-teal-500/10'}`} />
 
-        <CardHeader className="pt-8 pb-4 border-b border-slate-950/50 text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+        <CardHeader className="pt-8 pb-4 border-b border-slate-100 text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
             Complete Your Purchase
           </CardTitle>
-          <p className="text-xs text-slate-500 mt-2 font-mono tracking-wider">
+          <p className="text-xs text-slate-400 mt-2 font-mono tracking-wider">
             RESERVATION: {id}
           </p>
         </CardHeader>
 
         <CardContent className="py-8 px-8 space-y-8">
           {/* Main Visual Timer Display */}
-          <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-950/50 border border-slate-900/80 shadow-inner">
+          <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-inner">
             <div className="text-center space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                 Hold Status
               </span>
               
               {secondsLeft !== null ? (
                 <div className="space-y-2 pt-2">
-                  <div className={`text-4xl font-extrabold tracking-tight tabular-nums transition-all ${expired ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.2)]' : 'text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.15)]'}`}>
+                  <div className={`text-4xl font-extrabold tracking-tight tabular-nums transition-all ${expired ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.1)]' : 'text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.1)]'}`}>
                     {expired ? 'Expired' : `${Math.floor(secondsLeft / 60)}m ${secondsLeft % 60}s`}
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     {expired 
                       ? 'The 10-minute database lock has been released.' 
                       : 'Inventory is locked exclusively for you until timer expires.'}
                   </p>
                 </div>
               ) : (
-                <div className="h-10 w-32 bg-slate-900 rounded animate-pulse mt-2" />
+                <div className="h-10 w-32 bg-slate-100 rounded animate-pulse mt-2" />
               )}
             </div>
           </div>
@@ -115,9 +115,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
             <Button 
               onClick={confirm} 
               disabled={expired || confirming || cancelling}
-              className={`flex-1 py-6 text-sm font-semibold tracking-wide transition-all shadow-md ${
+              className={`flex-1 py-6 text-sm font-semibold tracking-wide transition-all shadow-sm ${
                 expired 
-                  ? 'bg-slate-950 text-slate-600 border border-slate-900 cursor-not-allowed'
+                  ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed shadow-none'
                   : 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-600/10 hover:shadow-teal-600/20 active:scale-95'
               }`}
             >
@@ -134,13 +134,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               variant="outline" 
               onClick={cancel}
               disabled={cancelling || confirming}
-              className="flex-1 py-6 text-sm font-semibold border-slate-900 text-slate-300 hover:bg-slate-900 hover:text-white transition-all active:scale-95"
+              className="flex-1 py-6 text-sm font-semibold border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all active:scale-95"
             >
               {cancelling ? (
-                <span className="flex items-center gap-2 justify-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="flex items-center gap-1.5 justify-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '300ms' }} />
                 </span>
               ) : 'Release Inventory'}
             </Button>

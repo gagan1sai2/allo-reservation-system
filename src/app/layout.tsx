@@ -21,24 +21,24 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full antialiased dark`}
+      className={`${inter.variable} h-full antialiased light`}
     >
-      <body className="min-h-full flex flex-col bg-[#0b0f19] text-slate-100 font-sans selection:bg-teal-500/20 selection:text-teal-200">
+      <body className="min-h-full flex flex-col bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
         {/* Premium Header */}
-        <header className="sticky top-0 z-50 w-full border-b border-slate-900 bg-[#0b0f19]/80 backdrop-blur-md">
+        <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-teal-500 to-emerald-600 flex items-center justify-center font-bold text-white shadow-lg shadow-teal-500/10">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-teal-500 to-emerald-600 flex items-center justify-center font-bold text-white shadow-md shadow-teal-500/10">
                 A
               </div>
-              <span className="font-semibold text-lg tracking-tight bg-gradient-to-r from-slate-100 to-slate-200 bg-clip-text text-transparent">
-                AlloHealth <span className="text-xs font-medium text-teal-400 bg-teal-950/30 border border-teal-900/50 px-2 py-0.5 rounded-full ml-1.5 font-mono">Core</span>
+              <span className="font-semibold text-lg tracking-tight text-slate-900">
+                AlloHealth <span className="text-[10px] font-semibold text-teal-600 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded-full ml-1.5 font-mono uppercase tracking-wider">Core</span>
               </span>
             </div>
-            <nav className="flex items-center gap-6 text-sm font-medium text-slate-400">
-              <span className="flex items-center gap-1.5 text-emerald-400 bg-emerald-950/30 border border-emerald-900/50 px-2.5 py-1 rounded-full text-xs">
+            <nav className="flex items-center gap-6 text-sm font-medium text-slate-500">
+              <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full text-xs font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Database Connected
+                Live Database Active
               </span>
             </nav>
           </div>
@@ -50,13 +50,13 @@ export default function RootLayout({
         </div>
 
         {/* Footer */}
-        <footer className="border-t border-slate-900 py-6 mt-auto">
+        <footer className="border-t border-slate-200/60 py-6 mt-auto bg-white/40">
           <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
             <p>© {new Date().getFullYear()} AlloHealth. Inventory Reservation System.</p>
-            <p className="font-mono bg-slate-900/30 border border-slate-900 px-2.5 py-1 rounded">SELECT FOR UPDATE active</p>
+            <p className="font-mono bg-slate-100 text-slate-600 border border-slate-200/80 px-2.5 py-1 rounded">SELECT FOR UPDATE locking enabled</p>
           </div>
         </footer>
-        <Toaster theme="dark" closeButton richColors />
+        <Toaster theme="light" closeButton richColors />
       </body>
     </html>
   )
