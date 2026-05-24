@@ -6,13 +6,20 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 
-type InventoryItem = { id: string; warehouse: string; availableUnits: number }
+type InventoryItem = { 
+  id: string 
+  warehouse: string 
+  totalUnits: number 
+  reservedUnits: number 
+  availableUnits: number 
+}
 type Product = { id: string; name: string; inventory: InventoryItem[] }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [reservingId, setReservingId] = useState<string | null>(null)
+  const [quantities, setQuantities] = useState<Record<string, number>>({})
   const [error, setError] = useState<Record<string, string>>({})
   const router = useRouter()
 
@@ -25,6 +32,7 @@ export default function ProductsPage() {
   }, [])
 
   async function reserve(inventoryId: string) {
+    const qty = quantities[inventoryId] ?? 1
     setReservingId(inventoryId)
     setError(e => ({ ...e, [inventoryId]: '' }))
 
@@ -32,11 +40,11 @@ export default function ProductsPage() {
       const res = await fetch('/api/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inventoryId, quantity: 1 }),
+        body: JSON.stringify({ inventoryId, quantity: qty }),
       })
 
       if (res.status === 409) {
-        const errorMsg = 'Out of stock — another user just reserved the last unit.'
+        const errorMsg = 'Insufficient stock — someone else just claimed these units.'
         setError(e => ({ ...e, [inventoryId]: errorMsg }))
         toast.error(errorMsg)
         return
@@ -47,7 +55,7 @@ export default function ProductsPage() {
       }
 
       const data = await res.json()
-      toast.success('Inventory held! Redirecting to checkout...')
+      toast.success(`${qty} unit(s) held! Redirecting to checkout...`)
       router.push(`/checkout/${data.id}`)
     } catch {
       toast.error('An unexpected connection error occurred.')
@@ -78,7 +86,7 @@ export default function ProductsPage() {
           Available Products
         </h1>
         <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
-          Select an item below to lock it. The database guarantees atomicity by acquiring row-level locks on the selected inventory record, preventing race conditions or double booking.
+          Select an item and customize the quantity below. The database guarantees atomicity by acquiring row-level locks on the selected inventory record, preventing race conditions or double booking.
         </p>
       </div>
 
@@ -96,41 +104,79 @@ export default function ProductsPage() {
               {product.inventory.map(inv => {
                 const isOutOfStock = inv.availableUnits <= 0
                 const isThisReserving = reservingId === inv.id
+                const currentQty = quantities[inv.id] ?? 1
 
                 return (
                   <div 
                     key={inv.id} 
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950/40 border border-slate-900/50 hover:border-indigo-500/10 hover:bg-slate-950/60 transition-all duration-200"
+                    className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950/40 border border-slate-900/50 hover:border-indigo-500/10 hover:bg-slate-950/60 transition-all duration-200"
                   >
-                    <div className="flex items-center gap-3">
-                      {/* Warehouse Icon indicator */}
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isOutOfStock ? 'bg-slate-900 text-slate-500' : 'bg-indigo-950/50 text-indigo-400 border border-indigo-900/30'}`}>
-                        WH
+                    {/* Left section: Warehouse Name & Details */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isOutOfStock ? 'bg-slate-900 text-slate-500' : 'bg-indigo-950/50 text-indigo-400 border border-indigo-900/30'}`}>
+                          WH
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-200">{inv.warehouse}</p>
+                          <span className="text-[10px] font-mono text-slate-500">ID: {inv.id}</span>
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-200">{inv.warehouse}</p>
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${isOutOfStock ? 'bg-red-950/30 text-red-400 border border-red-900/30' : 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/30'}`}
-                          >
-                            {inv.availableUnits} units available
-                          </Badge>
+
+                      {/* Stock stats grid */}
+                      <div className="grid grid-cols-3 gap-2 sm:gap-6 text-xs font-mono sm:border-l border-slate-900 sm:pl-6 py-1">
+                        <div className="flex flex-col">
+                          <span className="text-slate-500 uppercase tracking-wider text-[9px]">Total</span>
+                          <span className="text-slate-300 font-semibold mt-0.5">{inv.totalUnits}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-slate-500 uppercase tracking-wider text-[9px]">Reserved</span>
+                          <span className="text-amber-500 font-semibold mt-0.5">{inv.reservedUnits}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-slate-500 uppercase tracking-wider text-[9px]">Available</span>
+                          <span className={`font-semibold mt-0.5 ${isOutOfStock ? 'text-red-500' : 'text-emerald-400'}`}>
+                            {isOutOfStock ? 'Out of Stock' : inv.availableUnits}
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                    {/* Right section: Quantity Selector & Reserve Button */}
+                    <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 w-full lg:w-auto border-t lg:border-t-0 border-slate-900/50 pt-3 lg:pt-0">
                       {error[inv.id] && (
-                        <p className="text-xs font-medium text-red-400 max-w-[200px] text-right">
+                        <p className="text-xs font-medium text-red-400 max-w-[200px] text-right order-first sm:order-none">
                           {error[inv.id]}
                         </p>
                       )}
+
+                      {!isOutOfStock && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-slate-400">Qty:</span>
+                          <input
+                            type="number"
+                            min="1"
+                            max={inv.availableUnits}
+                            value={currentQty}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || 1
+                              setQuantities(q => ({ 
+                                ...q, 
+                                [inv.id]: Math.min(inv.availableUnits, Math.max(1, val)) 
+                              }))
+                            }}
+                            disabled={reservingId !== null}
+                            className="w-16 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-900 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 text-center font-semibold font-mono"
+                          />
+                        </div>
+                      )}
+
                       <Button
                         disabled={isOutOfStock || reservingId !== null}
                         onClick={() => reserve(inv.id)}
                         className={`w-full sm:w-28 font-medium shadow-md transition-all duration-200 ${
                           isOutOfStock 
-                            ? 'bg-slate-900 text-slate-500 cursor-not-allowed'
+                            ? 'bg-slate-900 text-slate-500 cursor-not-allowed border border-slate-950'
                             : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-95'
                         }`}
                       >
@@ -140,7 +186,7 @@ export default function ProductsPage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '150ms' }} />
                             <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '300ms' }} />
                           </span>
-                        ) : 'Reserve'}
+                        ) : isOutOfStock ? 'Sold Out' : 'Reserve'}
                       </Button>
                     </div>
                   </div>

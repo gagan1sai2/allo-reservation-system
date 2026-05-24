@@ -17,6 +17,7 @@ export async function GET() {
       id: inv.id,
       warehouse: inv.warehouse.name,
       totalUnits: inv.totalUnits,
+      reservedUnits: inv.reservedUnits,
       availableUnits: inv.totalUnits - inv.reservedUnits,
     })),
   }))
