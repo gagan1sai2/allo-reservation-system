@@ -35,7 +35,7 @@ export default function RootLayout({
                 </svg>
               </div>
               <span className="font-semibold text-lg tracking-tight text-slate-900">
-                Allo Reservation
+                Allo Health
               </span>
             </div>
             <nav className="flex items-center gap-6 text-sm font-medium text-slate-500">
