@@ -8,9 +8,33 @@ const schema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  const idempotencyKey = req.headers.get('idempotency-key')
+
+  // Check for existing idempotency record
+  if (idempotencyKey) {
+    try {
+      const existing = await prisma.idempotencyRecord.findUnique({
+        where: { key: idempotencyKey },
+      })
+      if (existing) {
+        return NextResponse.json(JSON.parse(existing.response), { status: existing.statusCode })
+      }
+    } catch (e) {
+      // Fallback if DB query fails
+    }
+  }
+
   const body = await req.json()
   const parsed = schema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+  if (!parsed.success) {
+    const errorResponse = { error: 'Invalid input' }
+    if (idempotencyKey) {
+      await prisma.idempotencyRecord.create({
+        data: { key: idempotencyKey, response: JSON.stringify(errorResponse), statusCode: 400 }
+      }).catch(() => {})
+    }
+    return NextResponse.json(errorResponse, { status: 400 })
+  }
 
   const { inventoryId, quantity } = parsed.data
 
@@ -45,13 +69,32 @@ export async function POST(req: NextRequest) {
       })
     })
 
+    if (idempotencyKey) {
+      await prisma.idempotencyRecord.create({
+        data: { key: idempotencyKey, response: JSON.stringify(reservation), statusCode: 201 }
+      }).catch(() => {})
+    }
+
     return NextResponse.json(reservation, { status: 201 })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : ''
-    if (message === 'INSUFFICIENT_STOCK')
-      return NextResponse.json({ error: 'Insufficient stock' }, { status: 409 })
-    if (message === 'NOT_FOUND')
-      return NextResponse.json({ error: 'Inventory not found' }, { status: 404 })
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    let errorResponse = { error: 'Internal error' }
+    let statusCode = 500
+
+    if (message === 'INSUFFICIENT_STOCK') {
+      errorResponse = { error: 'Insufficient stock' }
+      statusCode = 409
+    } else if (message === 'NOT_FOUND') {
+      errorResponse = { error: 'Inventory not found' }
+      statusCode = 404
+    }
+
+    if (idempotencyKey && statusCode !== 500) {
+      await prisma.idempotencyRecord.create({
+        data: { key: idempotencyKey, response: JSON.stringify(errorResponse), statusCode }
+      }).catch(() => {})
+    }
+
+    return NextResponse.json(errorResponse, { status: statusCode })
   }
 }

@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const idempotencyKey = req.headers.get('idempotency-key')
+
+  // Check for existing idempotency record
+  if (idempotencyKey) {
+    try {
+      const existing = await prisma.idempotencyRecord.findUnique({
+        where: { key: idempotencyKey },
+      })
+      if (existing) {
+        return NextResponse.json(JSON.parse(existing.response), { status: existing.statusCode })
+      }
+    } catch (e) {
+      // Fallback
+    }
+  }
+
   try {
     const { id } = await params
     const result = await prisma.$transaction(async (tx) => {
@@ -30,12 +46,35 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       return { confirmed: true }
     })
 
+    if (idempotencyKey) {
+      await prisma.idempotencyRecord.create({
+        data: { key: idempotencyKey, response: JSON.stringify(result), statusCode: 200 }
+      }).catch(() => {})
+    }
+
     return NextResponse.json(result)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : ''
-    if (message === 'EXPIRED') return NextResponse.json({ error: 'Reservation expired' }, { status: 410 })
-    if (message === 'NOT_FOUND') return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    if (message === 'INVALID_STATE') return NextResponse.json({ error: 'Already confirmed or released' }, { status: 409 })
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    let errorResponse = { error: 'Internal error' }
+    let statusCode = 500
+
+    if (message === 'EXPIRED') {
+      errorResponse = { error: 'Reservation expired' }
+      statusCode = 410
+    } else if (message === 'NOT_FOUND') {
+      errorResponse = { error: 'Not found' }
+      statusCode = 404
+    } else if (message === 'INVALID_STATE') {
+      errorResponse = { error: 'Already confirmed or released' }
+      statusCode = 409
+    }
+
+    if (idempotencyKey && statusCode !== 500) {
+      await prisma.idempotencyRecord.create({
+        data: { key: idempotencyKey, response: JSON.stringify(errorResponse), statusCode }
+      }).catch(() => {})
+    }
+
+    return NextResponse.json(errorResponse, { status: statusCode })
   }
 }

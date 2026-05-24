@@ -46,3 +46,10 @@ model Reservation {
   createdAt   DateTime          @default(now())
   inventory   Inventory         @relation(fields: [inventoryId], references: [id])
 }
+
+model IdempotencyRecord {
+  key        String   @id
+  response   String
+  statusCode Int
+  createdAt  DateTime @default(now())
+}
