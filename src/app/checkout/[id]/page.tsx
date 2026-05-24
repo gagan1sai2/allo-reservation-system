@@ -74,7 +74,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     <main className="max-w-xl mx-auto px-6 py-16 flex-1 flex flex-col justify-center items-center w-full">
       <Card className="w-full bg-slate-900/30 backdrop-blur border-slate-900/80 shadow-2xl overflow-hidden relative">
         {/* Glow accent bar */}
-        <div className={`absolute top-0 left-0 right-0 h-[3px] transition-all duration-300 ${expired ? 'bg-red-500 shadow-md shadow-red-500/50' : 'bg-gradient-to-r from-amber-500 to-indigo-500 shadow-md shadow-indigo-500/50'}`} />
+        <div className={`absolute top-0 left-0 right-0 h-[3px] transition-all duration-300 ${expired ? 'bg-red-500 shadow-md shadow-red-500/50' : 'bg-gradient-to-r from-amber-500 to-teal-500 shadow-md shadow-teal-500/10'}`} />
 
         <CardHeader className="pt-8 pb-4 border-b border-slate-950/50 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
@@ -95,7 +95,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               
               {secondsLeft !== null ? (
                 <div className="space-y-2 pt-2">
-                  <div className={`text-4xl font-extrabold tracking-tight tabular-nums transition-all ${expired ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.2)]' : 'text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.2)]'}`}>
+                  <div className={`text-4xl font-extrabold tracking-tight tabular-nums transition-all ${expired ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.2)]' : 'text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.15)]'}`}>
                     {expired ? 'Expired' : `${Math.floor(secondsLeft / 60)}m ${secondsLeft % 60}s`}
                   </div>
                   <p className="text-xs text-slate-400">
@@ -118,7 +118,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               className={`flex-1 py-6 text-sm font-semibold tracking-wide transition-all shadow-md ${
                 expired 
                   ? 'bg-slate-950 text-slate-600 border border-slate-900 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-95'
+                  : 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-600/10 hover:shadow-teal-600/20 active:scale-95'
               }`}
             >
               {confirming ? (

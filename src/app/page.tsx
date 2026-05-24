@@ -109,12 +109,12 @@ export default function ProductsPage() {
                 return (
                   <div 
                     key={inv.id} 
-                    className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950/40 border border-slate-900/50 hover:border-indigo-500/10 hover:bg-slate-950/60 transition-all duration-200"
+                    className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950/40 border border-slate-900/50 hover:border-teal-500/10 hover:bg-slate-950/60 transition-all duration-200"
                   >
                     {/* Left section: Warehouse Name & Details */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isOutOfStock ? 'bg-slate-900 text-slate-500' : 'bg-indigo-950/50 text-indigo-400 border border-indigo-900/30'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold ${isOutOfStock ? 'bg-slate-900 text-slate-500' : 'bg-teal-950/30 text-teal-400 border border-teal-900/30'}`}>
                           WH
                         </div>
                         <div>
@@ -166,7 +166,7 @@ export default function ProductsPage() {
                               }))
                             }}
                             disabled={reservingId !== null}
-                            className="w-16 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-900 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 text-center font-semibold font-mono"
+                            className="w-16 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-900 text-slate-200 text-sm focus:outline-none focus:border-teal-500 text-center font-semibold font-mono"
                           />
                         </div>
                       )}
@@ -177,7 +177,7 @@ export default function ProductsPage() {
                         className={`w-full sm:w-28 font-medium shadow-md transition-all duration-200 ${
                           isOutOfStock 
                             ? 'bg-slate-900 text-slate-500 cursor-not-allowed border border-slate-950'
-                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-95'
+                            : 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-600/10 hover:shadow-teal-600/20 active:scale-95'
                         }`}
                       >
                         {isThisReserving ? (
