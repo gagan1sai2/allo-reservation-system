@@ -2,6 +2,14 @@ import 'dotenv/config'
 import { prisma } from '../src/lib/prisma'
 
 async function main() {
+  console.log('Clearing database tables...')
+  await prisma.idempotencyRecord.deleteMany({})
+  await prisma.reservation.deleteMany({})
+  await prisma.inventory.deleteMany({})
+  await prisma.product.deleteMany({})
+  await prisma.warehouse.deleteMany({})
+
+  console.log('Seeding fresh records...')
   const warehouse1 = await prisma.warehouse.create({ data: { name: 'Delhi Warehouse' } })
   const warehouse2 = await prisma.warehouse.create({ data: { name: 'Mumbai Warehouse' } })
 
